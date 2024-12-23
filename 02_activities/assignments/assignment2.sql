@@ -254,16 +254,12 @@ CREATE TABLE temp.latest_quantity AS
 SELECT 
     vi.product_id,
     vi.quantity
-FROM vendor_inventory AS vi
-JOIN (
-    SELECT 
-        product_id,
-        MAX(market_date) AS max_dt
+FROM vendor_inventory vi
+WHERE vi.market_date = (
+    SELECT MAX(market_date)
     FROM vendor_inventory
-    GROUP BY product_id
-) AS md
-   ON vi.product_id = md.product_id
-  AND vi.market_date = md.max_dt;
+    WHERE product_id = vi.product_id
+);
 
 UPDATE product_units
 SET current_quantity = coalesce(lq.quantity, 0)
